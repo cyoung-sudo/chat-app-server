@@ -33,10 +33,10 @@ io.on("connect", socket => {
 
   //----- Handle new messages
   socket.on("message", data => {
-    console.log(`User${socket.id}: ${data}`);
+    console.log(`User(${socket.id}: ${data})`);
     // Create/Save message
     Message.create({
-      user: `User${socket.id}`,
+      user: `User(${socket.id})`,
       text: data
     })
     .then(savedDoc => {
