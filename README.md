@@ -4,7 +4,7 @@
 
 ## Links
 
-- [Website](https://chat-app-server-ob9b.onrender.com)
+- [Website](https://chat-app-client-vlae.onrender.com)
 
 - [Client Repo](https://github.com/cyoung-sudo/chat-app-client)
 
