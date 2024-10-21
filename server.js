@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import "./db/connection.js";
+import { connectToDatabase } from "./db/connection.js";
 // Socket
 import { createServer } from "node:http";
 import { Server } from "socket.io";
@@ -21,34 +21,40 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-io.on("connect", socket => {
-  //----- Send messages on initial connection
-  // Delete all messages in max reached
-  Message.find({})
-    .then(docs => {
-      socket.emit("update", docs);
-    })
-    .catch(err => console.log(err));
-
-  //----- Handle new messages
-  socket.on("message", data => {
-    // Create/Save message
-    Message.create({
-      user: `User(${socket.id})`,
-      text: data
-    })
-    .then(savedDoc => {
-      // Retrieve all messages
-      return Message.find({});
-    })
-    .then(docs => {
-      // Emit messages to all
-      io.sockets.emit("update", docs)
-    })
-    .catch(err => console.log(err));
+//----- DB connection
+connectToDatabase()
+.then(() => {
+  io.on("connect", socket => {
+    //----- Send messages on initial connection
+    // Delete all messages in max reached
+    Message.find({})
+      .then(docs => {
+        socket.emit("update", docs);
+      })
+      .catch(err => console.log(err));
+  
+    //----- Handle new messages
+    socket.on("message", data => {
+      // Create/Save message
+      Message.create({
+        user: `User(${socket.id})`,
+        text: data
+      })
+      .then(savedDoc => {
+        // Retrieve all messages
+        return Message.find({});
+      })
+      .then(docs => {
+        // Emit messages to all
+        io.sockets.emit("update", docs)
+      })
+      .catch(err => console.log(err));
+    });
   });
-});
-
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+  
+  //----- Server connection
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+})
+.catch(err => console.log(err));
